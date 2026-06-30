@@ -1,346 +1,568 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Audio Mixer</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: sans-serif;
-      background: #0f0f0f;
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-    }
-    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-    p.sub { color: #888; margin-bottom: 2rem; font-size: 0.95rem; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceFront — Hear the dialogue. Silence the noise.</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
 
-    #drop-zone {
-      border: 2px dashed #444;
-      border-radius: 16px;
-      padding: 3rem 4rem;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      margin-bottom: 2rem;
-      width: 100%;
-      max-width: 500px;
-    }
-    #drop-zone:hover, #drop-zone.dragover { border-color: #7c6fff; }
-    #drop-zone p { color: #888; margin-top: 0.5rem; font-size: 0.9rem; }
+  :root{
+    --bg: #0b0f10;
+    --bg-2: #11171a;
+    --line: rgba(255,255,255,0.08);
+    --text: #eef2f1;
+    --text-dim: #9aa6a4;
+    --text-faint: #5d6968;
+    --teal: #2dd4bf;
+    --blue: #3b8add;
+    --grad: linear-gradient(90deg, var(--teal), var(--blue));
+  }
 
-    #status {
-      margin-bottom: 1.5rem;
-      font-size: 0.95rem;
-      color: #aaa;
-      min-height: 1.5rem;
-    }
-    .spinner {
-      display: inline-block;
-      width: 14px; height: 14px;
-      border: 2px solid #555;
-      border-top-color: #7c6fff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin-right: 8px;
-      vertical-align: middle;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--teal); color:#04201c; }
 
-    #mixer {
-      display: none;
-      flex-direction: column;
-      gap: 1.5rem;
-      width: 100%;
-      max-width: 500px;
-      background: #1a1a1a;
-      border-radius: 16px;
-      padding: 2rem;
-    }
-    .slider-row { display: flex; flex-direction: column; gap: 0.5rem; }
-    .slider-row label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.95rem;
-      color: #ccc;
-    }
-    .slider-row label span { color: #7c6fff; font-weight: 600; }
-    input[type=range] {
-      width: 100%;
-      accent-color: #7c6fff;
-      height: 6px;
-      cursor: pointer;
-    }
-    #play-btn {
-      background: #7c6fff;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: 0.85rem;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    #play-btn:hover { background: #6455e0; }
-    #reset-btn {
-      background: transparent;
-      color: #666;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 0.6rem;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    #reset-btn:hover { color: #aaa; border-color: #555; }
-  </style>
+  h1,h2,h3{ font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.02em; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 28px; }
+
+  a{ color:inherit; text-decoration:none; }
+
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(11,15,16,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:64px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:1rem; }
+  .brand-mark{ width:22px; height:22px; }
+  nav .links{ display:flex; gap:28px; font-size:0.88rem; color:var(--text-dim); }
+  nav .links a:hover{ color:var(--text); }
+  .nav-cta{
+    font-size:0.82rem; padding:8px 16px; border-radius:7px;
+    background:var(--text); color:#08100f; font-weight:600;
+  }
+  @media(max-width:680px){ nav .links{ display:none; } }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:96px 0 64px;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.74rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--teal);
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:22px;
+  }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal); }
+
+  .hero h1{
+    font-size:clamp(2.4rem, 6vw, 4.4rem);
+    line-height:1.04;
+    max-width:880px;
+    margin-bottom:26px;
+  }
+  /* noise-to-clear text trick */
+  .noisy{ position:relative; display:inline-block; }
+  .noisy .clean{ background:linear-gradient(90deg,#fff,#fff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .noisy .ghost{
+    position:absolute; left:0; top:0; width:100%; height:100%;
+    color:var(--text-faint);
+    opacity:0.5;
+    filter:blur(0.4px);
+    animation:jitter 2.6s steps(2,end) infinite;
+    pointer-events:none;
+  }
+  @keyframes jitter{
+    0%,100%{ transform:translate(0,0); opacity:0.45; }
+    25%{ transform:translate(1.5px,-1px); opacity:0.25; }
+    50%{ transform:translate(-1px,1px); opacity:0.5; }
+    75%{ transform:translate(1px,0.5px); opacity:0.3; }
+  }
+
+  .hero p.lede{
+    font-size:1.12rem;
+    color:var(--text-dim);
+    max-width:560px;
+    margin-bottom:36px;
+  }
+  .hero p.lede strong{ color:var(--text); font-weight:500; }
+
+  .cta-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-bottom:18px; }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:13px 22px; border-radius:9px;
+    font-weight:600; font-size:0.92rem;
+    transition:transform 0.15s ease, opacity 0.15s ease;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn-primary{ background:var(--grad); color:#04201c; }
+  .btn-ghost{ border:1px solid var(--line); color:var(--text); }
+  .btn-ghost:hover{ border-color:var(--text-faint); }
+  .hero-note{ font-size:0.8rem; color:var(--text-faint); }
+
+  /* ---------- slider mockup ---------- */
+  .mixer-demo{
+    margin-top:64px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:linear-gradient(180deg, var(--bg-2), var(--bg));
+    padding:28px;
+    max-width:520px;
+  }
+  .mixer-demo .row{ margin-bottom:18px; }
+  .mixer-demo .row:last-child{ margin-bottom:0; }
+  .mixer-demo label{
+    display:flex; justify-content:space-between;
+    font-size:0.85rem; color:var(--text-dim); margin-bottom:8px;
+  }
+  .mixer-demo label .val{ color:var(--teal); font-family:'IBM Plex Mono', monospace; font-size:0.8rem; }
+  .track{ height:5px; border-radius:3px; background:rgba(255,255,255,0.08); position:relative; overflow:hidden; }
+  .track .fill{ position:absolute; left:0; top:0; height:100%; border-radius:3px; }
+  .fill-teal{ background:var(--teal); }
+  .fill-blue{ background:var(--blue); opacity:0.55; }
+
+  /* ---------- section shared ---------- */
+  section{ padding:84px 0; border-top:1px solid var(--line); }
+  .section-head{ max-width:620px; margin-bottom:48px; }
+  .section-head .eyebrow{ margin-bottom:14px; }
+  .section-head h2{ font-size:clamp(1.7rem,3.4vw,2.4rem); margin-bottom:14px; }
+  .section-head p{ color:var(--text-dim); font-size:1.02rem; }
+
+  /* ---------- demo video ---------- */
+  .demo-frame{
+    border-radius:16px; overflow:hidden;
+    border:1px solid var(--line);
+    background:#000;
+  }
+  .demo-frame video{ width:100%; display:block; }
+
+  /* ---------- how it works ---------- */
+  .how-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:48px;
+    align-items:start;
+  }
+  @media(max-width:760px){ .how-grid{ grid-template-columns:1fr; } }
+
+  .stereo-art{
+    border:1px solid var(--line); border-radius:14px;
+    background:var(--bg-2);
+    padding:32px 20px;
+    display:flex; align-items:center; justify-content:center;
+    height:280px;
+    position:relative;
+  }
+  .field-line{ position:absolute; left:14%; right:14%; top:50%; height:1px; background:var(--line); }
+  .speaker{
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:34px; height:46px; border:1px solid var(--text-faint); border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:0.7rem; color:var(--text-faint);
+  }
+  .speaker.l{ left:10%; } .speaker.r{ right:10%; }
+  .blob{ position:absolute; border-radius:50%; top:50%; transform:translateY(-50%); }
+  .blob-music{ background:var(--blue); opacity:0.35; }
+  .blob-voice{
+    background:var(--teal); opacity:0.92;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:0.66rem; color:#04201c; font-weight:600;
+    left:50%; transform:translate(-50%,-50%);
+  }
+
+  .step-list{ counter-reset:step; }
+  .step{
+    display:flex; gap:18px; padding:20px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .step:last-child{ border-bottom:none; }
+  .step-num{
+    font-family:'IBM Plex Mono', monospace; color:var(--teal);
+    font-size:0.85rem; min-width:28px;
+  }
+  .step h3{ font-size:1.02rem; margin-bottom:6px; font-weight:600; }
+  .step p{ color:var(--text-dim); font-size:0.92rem; }
+
+  /* ---------- use cases ---------- */
+  .use-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  @media(max-width:760px){ .use-grid{ grid-template-columns:1fr; } }
+  .use-card{ background:var(--bg); padding:30px 26px; }
+  .use-card .icon{ font-size:1.4rem; margin-bottom:14px; display:block; }
+  .use-card h3{ font-size:1.02rem; margin-bottom:8px; }
+  .use-card p{ color:var(--text-dim); font-size:0.9rem; }
+
+  /* ---------- controls ---------- */
+  .controls-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  @media(max-width:760px){ .controls-grid{ grid-template-columns:1fr; } }
+  .ctrl-card{
+    border:1px solid var(--line); border-radius:14px; padding:26px;
+    background:var(--bg-2);
+  }
+  .ctrl-card .tag{
+    font-family:'IBM Plex Mono', monospace; font-size:0.72rem;
+    color:var(--teal); text-transform:uppercase; letter-spacing:0.08em;
+    margin-bottom:12px; display:block;
+  }
+  .ctrl-card h3{ font-size:1.1rem; margin-bottom:8px; }
+  .ctrl-card p{ color:var(--text-dim); font-size:0.88rem; }
+
+  /* ---------- privacy strip ---------- */
+  .privacy{
+    border-top:1px solid var(--line);
+    padding:56px 0;
+  }
+  .privacy-row{
+    display:flex; gap:40px; flex-wrap:wrap;
+  }
+  .privacy-item{ flex:1; min-width:220px; }
+  .privacy-item .mono{ color:var(--teal); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:8px; }
+  .privacy-item p{ color:var(--text-dim); font-size:0.92rem; }
+
+  /* ---------- install ---------- */
+  .install-box{
+    border:1px solid var(--line); border-radius:16px;
+    background:var(--bg-2);
+    padding:40px;
+  }
+  .install-steps{ counter-reset:inst; margin-top:24px; }
+  .install-step{
+    display:flex; gap:16px; padding:14px 0;
+    border-bottom:1px solid var(--line);
+    font-size:0.94rem;
+  }
+  .install-step:last-child{ border-bottom:none; }
+  .install-step .n{
+    font-family:'IBM Plex Mono', monospace; color:var(--teal);
+    min-width:22px;
+  }
+  .install-step code{
+    background:rgba(255,255,255,0.06); padding:2px 7px; border-radius:5px;
+    font-family:'IBM Plex Mono', monospace; font-size:0.84rem;
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:48px 0 60px;
+  }
+  footer .wrap{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+  }
+  footer .left{ display:flex; align-items:center; gap:10px; color:var(--text-dim); font-size:0.86rem; }
+  footer .right{ display:flex; gap:22px; font-size:0.86rem; color:var(--text-dim); }
+  footer .right a:hover{ color:var(--text); }
+
+  .skip-link{ position:absolute; left:-9999px; }
+  .skip-link:focus{ left:16px; top:16px; background:var(--teal); color:#04201c; padding:8px 14px; border-radius:6px; z-index:100; }
+
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .noisy .ghost{ animation:none; opacity:0; }
+    html{ scroll-behavior:auto; }
+  }
+</style>
 </head>
 <body>
 
-  <h1>🎚 Audio Mixer</h1>
-  <p class="sub">Separate voice and background music — control them independently</p>
+<a href="#main" class="skip-link">Skip to content</a>
 
-  <div id="drop-zone" onclick="document.getElementById('file-input').click()">
-    <div style="font-size:2.5rem">🎵</div>
-    <strong>Drop your audio or video file here</strong>
-    <p>or click to browse — MP3, MP4, WAV supported</p>
-    <input type="file" id="file-input" accept="audio/*,video/*" style="display:none">
+<nav>
+  <div class="wrap">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="24" height="24" rx="6" fill="#0f1719"/>
+        <rect x="3" y="10" width="2" height="4" rx="1" fill="#2dd4bf"/>
+        <rect x="7" y="7" width="2" height="10" rx="1" fill="#39c2c0"/>
+        <rect x="11" y="4" width="2" height="16" rx="1" fill="#37a8c6"/>
+        <rect x="15" y="7" width="2" height="10" rx="1" fill="#368fcc"/>
+        <rect x="19" y="10" width="2" height="4" rx="1" fill="#3b8add"/>
+      </svg>
+      VoiceFront
+    </div>
+    <div class="links">
+      <a href="#how">How it works</a>
+      <a href="#uses">Who it's for</a>
+      <a href="#install">Install</a>
+    </div>
+    <a class="nav-cta" href="https://github.com/K-Sriharika/VoiceFront" target="_blank" rel="noopener">View on GitHub</a>
   </div>
+</nav>
 
-  <div id="status"></div>
+<main id="main">
 
-  <div id="mixer">
-    <div class="slider-row">
-      <label>🎙 Voice <span id="voice-val">100%</span></label>
-      <input type="range" id="voice" min="0" max="200" value="100">
+  <!-- HERO -->
+  <section class="hero" style="border-top:none;">
+    <div class="wrap">
+      <div class="eyebrow"><span class="dot"></span> Free · Open source · Runs in your browser</div>
+      <h1>
+        <span class="noisy">
+          <span class="ghost" aria-hidden="true">Hear the dialogue.</span>
+          <span class="clean">Hear the dialogue.</span>
+        </span><br>
+        Silence the noise.
+      </h1>
+      <p class="lede">
+        VoiceFront separates voice from background music and crowd noise — <strong>live, while you watch</strong>. No uploads, no AI models, no server. Just real-time browser audio, on any stereo video in Chrome.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://github.com/K-Sriharika/VoiceFront" target="_blank" rel="noopener">Get VoiceFront — it's free</a>
+        <a class="btn btn-ghost" href="#how">See how it works ↓</a>
+      </div>
+      <div class="hero-note mono">tabCapture · zero uploads · 100% local processing</div>
+
+      <div class="mixer-demo" aria-hidden="true">
+        <div class="row">
+          <label><span>🎙 Voice</span><span class="val">180%</span></label>
+          <div class="track"><div class="fill fill-teal" style="width:90%;"></div></div>
+        </div>
+        <div class="row">
+          <label><span>🎵 Background</span><span class="val">15%</span></label>
+          <div class="track"><div class="fill fill-blue" style="width:15%;"></div></div>
+        </div>
+        <div class="row" style="margin-bottom:0;">
+          <label><span>🎯 Sharpness</span><span class="val">4.0</span></label>
+          <div class="track"><div class="fill fill-teal" style="width:65%; opacity:0.6;"></div></div>
+        </div>
+      </div>
     </div>
-    <div class="slider-row">
-      <label>🎵 Background Music <span id="bgm-val">100%</span></label>
-      <input type="range" id="bgm" min="0" max="200" value="100">
+  </section>
+
+  <!-- DEMO VIDEO -->
+  <section style="padding-top:64px;">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono"><span class="dot"></span> 00 — Watch it work</div>
+        <h2>The slider does what it says.</h2>
+        <p>30 seconds. Real video, real background noise, dragged live.</p>
+      </div>
+      <div class="demo-frame">
+        <video controls preload="metadata" poster="">
+          <source src="https://github.com/user-attachments/assets/4bea47b7-9f7e-48f8-902b-123e90334225" type="video/quicktime">
+          Your browser doesn't support embedded video — <a href="https://github.com/user-attachments/assets/4bea47b7-9f7e-48f8-902b-123e90334225">watch it here</a>.
+        </video>
+      </div>
     </div>
-    <div class="slider-row">
-      <label style="justify-content:space-between">
-        <span>⏱ Seek</span>
-        <span id="time-display" style="color:#888;font-size:0.85rem">0:00 / 0:00</span>
-      </label>
-      <input type="range" id="seek" min="0" max="1000" value="0">
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono"><span class="dot"></span> 01 — The mechanism</div>
+        <h2>It's position, not magic.</h2>
+        <p>Professionally mixed films and songs place the lead voice dead-centre in the stereo field, while music and ambience spread wide. VoiceFront exploits that — no machine learning required.</p>
+      </div>
+
+      <div class="how-grid">
+        <div class="stereo-art">
+          <div class="field-line"></div>
+          <div class="speaker l">L</div>
+          <div class="speaker r">R</div>
+          <div class="blob blob-music" style="width:64px; height:64px; left:28%;"></div>
+          <div class="blob blob-music" style="width:48px; height:48px; left:38%; top:38%;"></div>
+          <div class="blob blob-music" style="width:56px; height:56px; right:26%;"></div>
+          <div class="blob blob-music" style="width:40px; height:40px; right:36%; top:62%;"></div>
+          <div class="blob blob-voice" style="width:78px; height:78px;">VOICE</div>
+        </div>
+
+        <div class="step-list">
+          <div class="step">
+            <div class="step-num mono">01</div>
+            <div>
+              <h3>Captures your tab's audio</h3>
+              <p>Chrome's tab capture API streams the live audio — nothing leaves your browser.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num mono">02</div>
+            <div>
+              <h3>Runs a live FFT every 512-sample hop</h3>
+              <p>An AudioWorklet breaks the signal into frequency bins, continuously, with no perceptible lag.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num mono">03</div>
+            <div>
+              <h3>Checks left vs. right, per bin</h3>
+              <p>Equal in both channels → centre → voice. Different → panned wide → music or ambience.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num mono">04</div>
+            <div>
+              <h3>You mix the two back together</h3>
+              <p>Voice and Background become independent, gain-controlled streams — balance them however you like.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <button id="play-btn">▶ Play</button>
-    <button id="reset-btn">Upload another file</button>
+  </section>
+
+  <!-- USE CASES -->
+  <section id="uses">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono"><span class="dot"></span> 02 — Who it's for</div>
+        <h2>Built for the moment you rewind for the third time.</h2>
+      </div>
+
+      <div class="use-grid">
+        <div class="use-card">
+          <span class="icon">😂</span>
+          <h3>Stand-up & sitcoms</h3>
+          <p>Crowd laughter drowning the punchline? Duck the background, keep the joke.</p>
+        </div>
+        <div class="use-card">
+          <span class="icon">🎬</span>
+          <h3>Heavy background scores</h3>
+          <p>Bollywood, action films, prestige dramas — when the score outweighs the actors.</p>
+        </div>
+        <div class="use-card">
+          <span class="icon">👂</span>
+          <h3>Hearing difficulty</h3>
+          <p>Works as both a voice lift and a noise muffler at once — no subtitles required.</p>
+        </div>
+        <div class="use-card">
+          <span class="icon">🌍</span>
+          <h3>Watching in a second language</h3>
+          <p>Clearer dialogue means less missed meaning when you're not a native speaker.</p>
+        </div>
+        <div class="use-card">
+          <span class="icon">🌙</span>
+          <h3>Low-volume, late-night viewing</h3>
+          <p>Keep dialogue intelligible without waking the house with a loud score.</p>
+        </div>
+        <div class="use-card">
+          <span class="icon">🎤</span>
+          <h3>Karaoke mode</h3>
+          <p>Flip it — drop Voice to 0% and what's left is a clean instrumental.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTROLS -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono"><span class="dot"></span> 03 — The controls</div>
+        <h2>Three sliders. That's the whole interface.</h2>
+      </div>
+      <div class="controls-grid">
+        <div class="ctrl-card">
+          <span class="tag">🎙 Voice</span>
+          <h3>Dialogue volume</h3>
+          <p>Boosts the isolated centre-channel speech, independent of everything else playing.</p>
+        </div>
+        <div class="ctrl-card">
+          <span class="tag">🎵 Background</span>
+          <h3>Music & noise volume</h3>
+          <p>Controls everything panned wide — score, ambience, crowd. Drop to zero for voice-only.</p>
+        </div>
+        <div class="ctrl-card">
+          <span class="tag">🎯 Sharpness</span>
+          <h3>Separation strength</h3>
+          <p>Higher isolates more tightly, with more artefacts. Tune per track for the cleanest split.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="privacy">
+    <div class="wrap">
+      <div class="privacy-row">
+        <div class="privacy-item">
+          <span class="mono">No uploads</span>
+          <p>Audio is processed entirely inside your browser tab. Nothing is sent anywhere.</p>
+        </div>
+        <div class="privacy-item">
+          <span class="mono">No AI models</span>
+          <p>Pure signal processing — a live FFT and a stereo panning mask. No cloud inference.</p>
+        </div>
+        <div class="privacy-item">
+          <span class="mono">No server</span>
+          <p>There's nothing to be down. It runs, fully, on your machine.</p>
+        </div>
+        <div class="privacy-item">
+          <span class="mono">No cost</span>
+          <p>Free and MIT licensed. Read the source, fork it, build on it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section id="install">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono"><span class="dot"></span> 04 — Get it running</div>
+        <h2>Two minutes, no developer experience needed.</h2>
+      </div>
+
+      <div class="install-box">
+        <div class="cta-row" style="margin-bottom:0;">
+          <a class="btn btn-primary" href="https://github.com/K-Sriharika/VoiceFront" target="_blank" rel="noopener">Download from GitHub</a>
+        </div>
+        <div class="install-steps">
+          <div class="install-step"><span class="n mono">01</span><span>Click <code>Code → Download ZIP</code> on the GitHub repo, then unzip it.</span></div>
+          <div class="install-step"><span class="n mono">02</span><span>Open Chrome and go to <code>chrome://extensions</code></span></div>
+          <div class="install-step"><span class="n mono">03</span><span>Turn on <code>Developer mode</code> in the top-right corner.</span></div>
+          <div class="install-step"><span class="n mono">04</span><span>Click <code>Load unpacked</code> and select the <code>chrome-extension</code> folder.</span></div>
+          <div class="install-step"><span class="n mono">05</span><span>Play any stereo video, click the VoiceFront icon, and press <code>Start</code>.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="left">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect width="24" height="24" rx="6" fill="#0f1719"/>
+        <rect x="3" y="10" width="2" height="4" rx="1" fill="#2dd4bf"/>
+        <rect x="7" y="7" width="2" height="10" rx="1" fill="#39c2c0"/>
+        <rect x="11" y="4" width="2" height="16" rx="1" fill="#37a8c6"/>
+        <rect x="15" y="7" width="2" height="10" rx="1" fill="#368fcc"/>
+        <rect x="19" y="10" width="2" height="4" rx="1" fill="#3b8add"/>
+      </svg>
+      Built by K. Sriharika · MIT Licensed
+    </div>
+    <div class="right">
+      <a href="https://github.com/K-Sriharika/VoiceFront" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/K-Sriharika/VoiceFront#readme" target="_blank" rel="noopener">README</a>
+      <a href="https://github.com/K-Sriharika/VoiceFront/issues" target="_blank" rel="noopener">Report an issue</a>
+    </div>
   </div>
+</footer>
 
-  <script>
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const status   = document.getElementById('status');
-    const mixer    = document.getElementById('mixer');
-
-    let vocalsBuffer = null, bgmBuffer = null;
-    let audioCtx = null;
-    let playingSources = [];
-    let vocalsGain = null, bgmGain = null;
-    let isPlaying = false;
-    let startTime = 0, startOffset = 0;
-    let rafId = null;
-
-    // ── drag & drop ──────────────────────────────────────────────────────────
-    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', e => {
-      e.preventDefault(); dropZone.classList.remove('dragover');
-      handleFile(e.dataTransfer.files[0]);
-    });
-    fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
-
-    // ── file upload & processing ─────────────────────────────────────────────
-    async function handleFile(file) {
-      if (!file) return;
-
-      // Tear down any previous session
-      cancelAnimationFrame(rafId);
-      stopSources();
-      isPlaying = false; startOffset = 0;
-      vocalsGain = null; bgmGain = null;
-      vocalsBuffer = null; bgmBuffer = null;
-      if (audioCtx) { audioCtx.close(); audioCtx = null; }
-
-      // Create AudioContext NOW, while the user gesture is still active
-      audioCtx = new AudioContext();
-      mixer.style.display = 'none';
-      dropZone.style.display = 'none';
-      status.innerHTML = '<span class="spinner"></span>Uploading and separating audio… (takes ~30–60 s)';
-
-      const formData = new FormData();
-      formData.append('file', file);
-      try {
-        const res = await fetch('http://localhost:8000/separate', { method: 'POST', body: formData });
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
-
-        status.innerHTML = '<span class="spinner"></span>Decoding audio stems…';
-        vocalsBuffer = await decodeBase64(data.vocals);
-        bgmBuffer    = await decodeBase64(data.bgm);
-
-        // Reset UI state for the new file
-        startOffset = 0;
-        resetSliders();
-        updateSeekBar();
-        status.textContent = '✅ Ready! Adjust sliders and press Play.';
-        mixer.style.display = 'flex';
-      } catch (err) {
-        status.textContent = '❌ Error: ' + err.message;
-        if (audioCtx) { audioCtx.close(); audioCtx = null; }
-        dropZone.style.display = 'block';
-      }
-    }
-
-    async function decodeBase64(b64) {
-      const bin = atob(b64);
-      const buf = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-      return audioCtx.decodeAudioData(buf.buffer);
-    }
-
-    // ── helpers ──────────────────────────────────────────────────────────────
-    function getDuration()   { return vocalsBuffer ? vocalsBuffer.duration : 0; }
-    function getCurrentTime() {
-      if (!isPlaying) return startOffset;
-      return Math.min(startOffset + (audioCtx.currentTime - startTime), getDuration());
-    }
-
-    function stopSources() {
-      // Null out onended BEFORE stopping to prevent stale callbacks firing
-      playingSources.forEach(s => { s.onended = null; try { s.stop(); } catch(e) {} });
-      playingSources = [];
-    }
-
-    function resetSliders() {
-      ['voice','bgm'].forEach(id => {
-        document.getElementById(id).value = 100;
-        document.getElementById(id + '-val').textContent = '100%';
-      });
-    }
-
-    // ── playback ─────────────────────────────────────────────────────────────
-    // Slider value 0–200 maps to gain 0.0–1.0 (so two stems at 100% = combined 1.0, no clipping)
-    function sliderToGain(v) { return v / 200; }
-
-    function playFrom(offset) {
-      stopSources();
-
-      startOffset = Math.max(0, Math.min(offset, getDuration()));
-      startTime   = audioCtx.currentTime;
-
-      vocalsGain = audioCtx.createGain();
-      vocalsGain.gain.value = sliderToGain(document.getElementById('voice').value);
-      bgmGain = audioCtx.createGain();
-      bgmGain.gain.value = sliderToGain(document.getElementById('bgm').value);
-
-      [
-        { buffer: vocalsBuffer, gain: vocalsGain },
-        { buffer: bgmBuffer,    gain: bgmGain   }
-      ].forEach(({ buffer, gain }) => {
-        const src = audioCtx.createBufferSource();
-        src.buffer = buffer;
-        src.connect(gain);
-        gain.connect(audioCtx.destination);
-        src.start(0, startOffset);
-        playingSources.push(src);
-      });
-
-      // Natural end of track
-      playingSources[0].onended = () => {
-        if (isPlaying && getCurrentTime() >= getDuration() - 0.25) {
-          isPlaying = false;
-          startOffset = 0;
-          playingSources = [];
-          document.getElementById('play-btn').textContent = '▶ Play';
-          document.getElementById('play-btn').onclick = playStems;
-          updateSeekBar();
-        }
-      };
-
-      isPlaying = true;
-      document.getElementById('play-btn').textContent = '⏹ Stop';
-      document.getElementById('play-btn').onclick = stopPlayback;
-      scheduleSeekUpdate();
-    }
-
-    async function playStems() {
-      try {
-        await audioCtx.resume();
-        playFrom(startOffset);
-      } catch(err) {
-        status.textContent = '❌ Playback error: ' + err.message;
-      }
-    }
-
-    function stopPlayback() {
-      startOffset = getCurrentTime();
-      stopSources();
-      isPlaying = false;
-      cancelAnimationFrame(rafId);
-      document.getElementById('play-btn').textContent = '▶ Play';
-      document.getElementById('play-btn').onclick = playStems;
-      updateSeekBar();
-    }
-
-    // ── seek bar ─────────────────────────────────────────────────────────────
-    function scheduleSeekUpdate() {
-      cancelAnimationFrame(rafId);
-      (function tick() {
-        updateSeekBar();
-        if (isPlaying) rafId = requestAnimationFrame(tick);
-      })();
-    }
-
-    function updateSeekBar() {
-      const dur = getDuration(), cur = getCurrentTime();
-      document.getElementById('seek').value = dur > 0 ? (cur / dur) * 1000 : 0;
-      document.getElementById('time-display').textContent = fmt(cur) + ' / ' + fmt(dur);
-    }
-
-    function fmt(s) {
-      return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
-    }
-
-    document.getElementById('seek').addEventListener('input', function() {
-      const t = (this.value / 1000) * getDuration();
-      startOffset = t;
-      document.getElementById('time-display').textContent = fmt(t) + ' / ' + fmt(getDuration());
-    });
-    document.getElementById('seek').addEventListener('change', function() {
-      const t = (this.value / 1000) * getDuration();
-      if (isPlaying) playFrom(t); else { startOffset = t; updateSeekBar(); }
-    });
-
-    // ── volume sliders (live update while playing) ───────────────────────────
-    document.getElementById('play-btn').onclick = playStems;
-
-    document.getElementById('voice').oninput = function() {
-      document.getElementById('voice-val').textContent = this.value + '%';
-      if (vocalsGain) vocalsGain.gain.value = sliderToGain(this.value);
-    };
-    document.getElementById('bgm').oninput = function() {
-      document.getElementById('bgm-val').textContent = this.value + '%';
-      if (bgmGain) bgmGain.gain.value = sliderToGain(this.value);
-    };
-
-    // ── reset ────────────────────────────────────────────────────────────────
-    document.getElementById('reset-btn').onclick = () => {
-      stopPlayback();
-      vocalsBuffer = null; bgmBuffer = null;
-      vocalsGain = null; bgmGain = null;
-      if (audioCtx) { audioCtx.close(); audioCtx = null; }
-      resetSliders();
-      mixer.style.display = 'none';
-      dropZone.style.display = 'block';
-      status.textContent = '';
-      fileInput.value = '';
-    };
-  </script>
 </body>
 </html>
