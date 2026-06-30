@@ -70,18 +70,38 @@
 
   /* ---------- hero ---------- */
   .hero{ padding:64px 0 0; }
+  .hero-top{
+    display:grid; grid-template-columns:1.05fr 0.95fr; gap:48px;
+    align-items:center;
+    margin-bottom:48px;
+  }
+  @media(max-width:860px){ .hero-top{ grid-template-columns:1fr; gap:32px; } }
   .hero h1{
-    font-size:clamp(2.2rem, 5vw, 3.6rem);
-    line-height:1.06;
-    max-width:760px;
+    font-size:clamp(2.1rem, 4.4vw, 3.3rem);
+    line-height:1.08;
     margin-bottom:20px;
   }
   .hero h1 .accent{
     background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .hero p.lede{ font-size:1.06rem; color:var(--text-dim); max-width:580px; margin-bottom:30px; }
+  .hero p.lede{ font-size:1.06rem; color:var(--text-dim); margin-bottom:30px; }
   .hero p.lede strong{ color:var(--text); font-weight:600; }
   .cta-row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  .hero-image{
+    border:1px solid var(--line); border-radius:20px; overflow:hidden;
+    box-shadow:0 20px 50px -20px rgba(15,60,55,0.25);
+    position:relative;
+  }
+  .hero-image img{ width:100%; display:block; }
+  .hero-image .float-badge{
+    position:absolute; bottom:16px; left:16px;
+    background:rgba(255,255,255,0.95); backdrop-filter:blur(6px);
+    border:1px solid var(--line); border-radius:11px;
+    padding:9px 14px;
+    display:flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace; font-size:0.74rem; font-weight:500;
+    box-shadow:0 8px 20px rgba(8,20,18,0.1);
+  }
   .btn{
     display:inline-flex; align-items:center; gap:8px;
     padding:13px 22px; border-radius:9px;
@@ -95,11 +115,6 @@
   .hero-note{ font-size:0.8rem; color:var(--text-faint); margin-bottom:40px; }
 
   /* ---------- hero visual row: screenshot + video side by side ---------- */
-  .hero-media{
-    display:grid; grid-template-columns:1fr 1fr; gap:18px;
-    margin-bottom:8px;
-  }
-  @media(max-width:820px){ .hero-media{ grid-template-columns:1fr; } }
   .media-card{
     border:1px solid var(--line); border-radius:16px; overflow:hidden;
     background:var(--panel);
@@ -234,8 +249,8 @@
       VoiceFront
     </div>
     <div class="links">
-      <a href="#how">How it works</a>
       <a href="#uses">Who it's for</a>
+      <a href="#how">How it works</a>
       <a href="#install">Install</a>
       <a href="#links">Links</a>
     </div>
@@ -248,37 +263,80 @@
   <!-- HERO -->
   <section class="hero">
     <div class="wrap">
-      <div class="live-badge" style="margin-bottom:18px;"><span class="dot"></span> Processes live, in your browser</div>
-      <h1>Dialogue clear. <span class="accent">In real time.</span><br>No uploads, no waiting.</h1>
-      <p class="lede">
-        VoiceFront separates voice from background music and crowd noise <strong>as the video plays</strong> — not after you upload it, not after you wait. Drag a slider, hear the change instantly.
-      </p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="https://github.com/K-Sriharika/VoiceFront" target="_blank" rel="noopener">Get VoiceFront — it's free</a>
-        <a class="btn btn-ghost" href="#how">See how it works ↓</a>
-      </div>
-      <div class="hero-note mono">tabCapture · zero uploads · 100% local processing · MIT licensed</div>
-
-      <div class="hero-media">
-        <div class="media-card">
-          <div class="label"><span>Popup in action</span><span>Screenshot</span></div>
-          <img src="https://github.com/user-attachments/assets/4768b407-c6e0-4677-97ce-5ccc4e2dcaeb" alt="VoiceFront popup showing Voice, Background, and Sharpness sliders over a playing video">
+      <div class="hero-top">
+        <div>
+          <div class="live-badge" style="margin-bottom:18px;"><span class="dot"></span> Real-time · Chrome extension</div>
+          <h1>Hear the dialogue.<br><span class="accent">Silence the noise.</span></h1>
+          <p class="lede">
+            VoiceFront is a free <strong>Chrome extension</strong> that separates voice from background music and crowd noise <strong>as the video plays</strong> — not after an upload, not after a wait. Drag a slider, hear the change instantly.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="https://github.com/K-Sriharika/VoiceFront" target="_blank" rel="noopener">Get the Chrome extension — free</a>
+            <a class="btn btn-ghost" href="#uses">Who it's for ↓</a>
+          </div>
+          <div class="hero-note mono">tabCapture · zero uploads · 100% local processing · MIT licensed</div>
         </div>
-        <div class="media-card">
-          <div class="label"><span>30-second demo</span><span>🔊 with audio</span></div>
-          <video controls preload="metadata">
-            <source src="https://github.com/user-attachments/assets/4bea47b7-9f7e-48f8-902b-123e90334225" type="video/mp4">
-          </video>
-          <div class="video-fallback">
-            Video not loading? <a href="https://github.com/user-attachments/assets/4bea47b7-9f7e-48f8-902b-123e90334225" target="_blank" rel="noopener">Open it directly →</a>
+
+        <div class="hero-image">
+          <img src="https://github.com/user-attachments/assets/4768b407-c6e0-4677-97ce-5ccc4e2dcaeb" alt="VoiceFront Chrome extension popup showing live Voice, Background, and Sharpness sliders over a playing video">
+          <div class="float-badge"><span class="live-badge" style="padding:0;border:none;background:none;"><span class="dot"></span></span> live while you watch</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHO IT'S FOR + CONTROLS — comes first now -->
+  <section class="quad-section" id="uses">
+    <div class="wrap">
+      <div class="quadrants">
+        <div class="quad">
+          <span class="qnum mono">Who it's for</span>
+          <h3 style="margin-bottom:16px;">Built for the moment you rewind a third time</h3>
+          <div class="use-list">
+            <div class="use-row"><span class="ico">😂</span><span class="t"><strong>Stand-up &amp; sitcoms</strong> — <span>crowd laughter drowning the punchline? Duck the background, keep the joke.</span></span></div>
+            <div class="use-row"><span class="ico">🎬</span><span class="t"><strong>Heavy background scores</strong> — <span>Bollywood, action films, prestige dramas, when the score outweighs the actors.</span></span></div>
+            <div class="use-row"><span class="ico">👂</span><span class="t"><strong>Hearing difficulty</strong> — <span>works as a voice lift and a noise muffler at once, no subtitles required.</span></span></div>
+            <div class="use-row"><span class="ico">🌍</span><span class="t"><strong>Watching in a second language</strong> — <span>clearer dialogue means less missed meaning.</span></span></div>
+            <div class="use-row"><span class="ico">🌙</span><span class="t"><strong>Low-volume, late-night viewing</strong> — <span>keep dialogue intelligible without waking the house.</span></span></div>
+            <div class="use-row"><span class="ico">🎤</span><span class="t"><strong>Karaoke mode</strong> — <span>drop Voice to 0% and what's left is a clean instrumental.</span></span></div>
+          </div>
+        </div>
+
+        <div class="quad">
+          <span class="qnum mono">The controls</span>
+          <h3 style="margin-bottom:16px;">Three sliders. That's the whole interface.</h3>
+          <div class="use-list">
+            <div class="use-row"><span class="ico">🎙</span><span class="t"><strong>Voice</strong> — <span>boosts the isolated centre-channel speech, independent of everything else playing.</span></span></div>
+            <div class="use-row"><span class="ico">🎵</span><span class="t"><strong>Background</strong> — <span>controls everything panned wide — score, ambience, crowd. Drop to zero for voice-only.</span></span></div>
+            <div class="use-row"><span class="ico">🎯</span><span class="t"><strong>Sharpness</strong> — <span>higher isolates more tightly, with more artefacts. Tune per track for the cleanest split.</span></span></div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- HOW IT WORKS — quadrant 1 -->
-  <section class="quad-section" id="how">
+  <!-- DEMO VIDEO — own section, before How it works -->
+  <section class="quad-section" style="padding-top:0;">
+    <div class="wrap">
+      <div class="quad-head">
+        <span class="eyebrow">See it in action</span>
+        <h2>30 seconds, real video, dragged live</h2>
+        <p>Watch the Background slider drop and the noise fade in real time — no edit, no cut.</p>
+      </div>
+      <div class="media-card">
+        <div class="label"><span>Demo · with audio</span><span>🔊</span></div>
+        <video controls preload="metadata">
+          <source src="https://github.com/user-attachments/assets/4bea47b7-9f7e-48f8-902b-123e90334225" type="video/mp4">
+        </video>
+        <div class="video-fallback">
+          Video not loading inline? <a href="https://github.com/user-attachments/assets/4bea47b7-9f7e-48f8-902b-123e90334225" target="_blank" rel="noopener">Open it directly on GitHub →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS — comes after the video -->
+  <section class="quad-section" id="how" style="padding-top:0;">
     <div class="wrap">
       <div class="quad-head">
         <span class="eyebrow">How it works</span>
@@ -320,36 +378,6 @@
           </div>
           <h3>Mix it back, instantly, your way</h3>
           <p>Voice and Background become two independent, gain-controlled streams. Move a slider and the change is audible immediately — there's no processing queue, no "rendering," because nothing was ever uploaded in the first place.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- WHO IT'S FOR + CONTROLS — quadrant 2 -->
-  <section class="quad-section" id="uses" style="padding-top:0;">
-    <div class="wrap">
-      <div class="quadrants">
-        <div class="quad">
-          <span class="qnum mono">Who it's for</span>
-          <h3 style="margin-bottom:16px;">Built for the moment you rewind a third time</h3>
-          <div class="use-list">
-            <div class="use-row"><span class="ico">😂</span><span class="t"><strong>Stand-up &amp; sitcoms</strong> — <span>crowd laughter drowning the punchline? Duck the background, keep the joke.</span></span></div>
-            <div class="use-row"><span class="ico">🎬</span><span class="t"><strong>Heavy background scores</strong> — <span>Bollywood, action films, prestige dramas, when the score outweighs the actors.</span></span></div>
-            <div class="use-row"><span class="ico">👂</span><span class="t"><strong>Hearing difficulty</strong> — <span>works as a voice lift and a noise muffler at once, no subtitles required.</span></span></div>
-            <div class="use-row"><span class="ico">🌍</span><span class="t"><strong>Watching in a second language</strong> — <span>clearer dialogue means less missed meaning.</span></span></div>
-            <div class="use-row"><span class="ico">🌙</span><span class="t"><strong>Low-volume, late-night viewing</strong> — <span>keep dialogue intelligible without waking the house.</span></span></div>
-            <div class="use-row"><span class="ico">🎤</span><span class="t"><strong>Karaoke mode</strong> — <span>drop Voice to 0% and what's left is a clean instrumental.</span></span></div>
-          </div>
-        </div>
-
-        <div class="quad">
-          <span class="qnum mono">The controls</span>
-          <h3 style="margin-bottom:16px;">Three sliders. That's the whole interface.</h3>
-          <div class="use-list">
-            <div class="use-row"><span class="ico">🎙</span><span class="t"><strong>Voice</strong> — <span>boosts the isolated centre-channel speech, independent of everything else playing.</span></span></div>
-            <div class="use-row"><span class="ico">🎵</span><span class="t"><strong>Background</strong> — <span>controls everything panned wide — score, ambience, crowd. Drop to zero for voice-only.</span></span></div>
-            <div class="use-row"><span class="ico">🎯</span><span class="t"><strong>Sharpness</strong> — <span>higher isolates more tightly, with more artefacts. Tune per track for the cleanest split.</span></span></div>
-          </div>
         </div>
       </div>
     </div>
